@@ -1,39 +1,22 @@
-## Spamhaus DROP List ##
-A shell script that grabs the latest Spamhaus DROP List and adds it to iptables. We use this (among other tools) on our Ubuntu proxy server at [AppThemes](http://www.appthemes.com/) to cut down on spam and other malicious activity.
+## iptables Spamhaus DROP List pull-and-load script (for Cron) ##
+A shell script that grabs the latest Spamhaus DROP List and adds it to iptables.
+
+In our experience, this has successfully killed the last and hardest 35% of spam received by our mailserver.
+
+Additional blocklists can easily be added by popping their download URLs into the script (see the `URLS=` line).
+
+By default we're loading both the `drop` and `edrop` lists - which means you should pull-and-load frequently: https://www.spamhaus.org/drop/
 
 ## Usage ##
-Place the script somewhere on your server.
+Copy pull-and-load script to a suitable location.
 
-<pre>
-# find a nice home
-cd /home/YOUR-USERNAME/bin/
-
-# create the file and paste
-vim spamhaus.sh
-
-# make it executable
-chmod +x spamhaus.sh
-
-# set it loose
-sudo ./spamhaus.sh
-
-# confirm the rules have been added
-sudo iptables -L Spamhaus -n
-</pre>
-
-## Automatic Updating ##
-In order for the list to automatically update each day, you'll need to setup a cron job with crontab.
-<pre>
-# fire up the crontab (no sudo)
-crontab -e
-
-# run the script every day at 3am
-0 3 * * * /home/YOUR-USERNAME/bin/spamhaus.sh
-</pre>
-
+(We use `/etc/cron.daily/spamhaus-drop`.  Make sure it's executable by root.)
 
 ## Troubleshooting ##
 If you need to remove all the Spamhaus rules, run the following:
 <pre>
 sudo iptables -F Spamhaus
 </pre>
+
+## Todo
+Whitelists and validation.  We shouldn't implicitly trust a third party's block list!
