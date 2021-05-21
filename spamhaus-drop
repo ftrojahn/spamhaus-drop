@@ -23,11 +23,22 @@ CHAIN="Spamhaus"
 $IPTABLES -L "$CHAIN" -n
 
 # check to see if the chain already exists
-if [ $? -eq 0 ]; then
+if $IPTABLES -L "$CHAIN" -n
+then
     # flush the old rules
+    $IPTABLES -D INPUT -j "$CHAIN"
+    $IPTABLES -D FORWARD -j "$CHAIN"
     $IPTABLES -F "$CHAIN"
 
-    echo "Flushed old rules. Applying updated Spamhaus list...."
+    # Check is script is run with some kind of flag (like 'deletechain' for example)
+    if [ -n "$1" ]
+    then
+        $IPTABLES -X "$CHAIN"
+        echo "$CHAIN removed in iptables."
+        exit
+    else
+        echo "Flushed old rules. Applying updated Spamhaus list...."
+    fi
 else
     # create a new chain set
     $IPTABLES -N "$CHAIN"
