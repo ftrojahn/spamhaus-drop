@@ -40,6 +40,7 @@ usage() {
 	echo "Basic usage: $(basename $0) <-u>
 
 Additional options and arguments:
+  -u                   Download blocklists and update iptables
   -c=CHAIN_NAME        Override default iptables chain name
   -l=URL_LIST          Override default block list URLs [careful!]
   -f=CACHE_FILE_PATH   Override default cache file path
@@ -116,7 +117,7 @@ update_iptables() {
 	fi;
 
 	# iterate through all known spamming hosts
-	for IP in $( cat "$CACHE_FILE" | egrep -v '^;' | cut -d' ' -f1 ); do
+	for IP in $( cat "$CACHE_FILE" | grep -e "^\([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}\/[0-9]\{1,2\} " | cut -d' ' -f1 ); do
 		if [ $LOG_BLOCKLIST_HITS -eq 1 ]; then
 			# add the ip address log rule to the chain
 			$IPTABLES -A "$CHAIN" -p 0 -s "$IP" -j LOG --log-prefix "[SPAMHAUS BLOCK]" -m limit --limit 3/min --limit-burst 10
@@ -124,8 +125,6 @@ update_iptables() {
 
 		# add the ip address to the chain
 		$IPTABLES -A "$CHAIN" -p 0 -s "$IP" -j DROP
-
-		echo "$IP"
 	done
 
 	echo "'$CHAIN' chain updated with latest rules."
@@ -140,7 +139,7 @@ if [ "$(whoami)" != "root" ]; then
 	die "You must run this command as root."
 fi
 
-while getopts "zhoudtl:sc:f:" option; do
+while getopts "c:l:f:usodtzh" option; do
 	case "$option" in
 		c)	# override chain name
 			CHAIN="$OPTARG"
@@ -148,6 +147,10 @@ while getopts "zhoudtl:sc:f:" option; do
 		
 		l)  # override list of block list URLs
 			URLS="$OPTARG"
+			;;
+
+		f)  # override rule cache file path
+			CACHE_FILE="$OPTARG"
 			;;
 		
 		u)  # update block list
@@ -173,7 +176,7 @@ while getopts "zhoudtl:sc:f:" option; do
 		z)  # update iptables from local cache without downloading
 		    set_mode update_iptables
 			;;
-		
+
 		h)  # show usage information
 		    usage
 		    ;;
