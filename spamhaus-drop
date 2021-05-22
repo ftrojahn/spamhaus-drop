@@ -7,11 +7,13 @@
 # http://www.theunsupported.com/2012/07/block-malicious-ip-addresses/
 # http://www.cyberciti.biz/tips/block-spamming-scanning-with-iptables.html
 
+# Thanks to Daniel Hansson for providing a PR motivating bringing v2 of this script.
+
 # path to iptables
 IPTABLES="/sbin/iptables"
 
 # list of known spammers
-URLS="www.spamhaus.org/drop/drop.lasso www.spamhaus.org/drop/edrop.lasso"
+URLS="https://www.spamhaus.org/drop/drop.lasso https://www.spamhaus.org/drop/edrop.lasso"
 
 # local cache copy
 CACHE_FILE="/tmp/drop.lasso"
