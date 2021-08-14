@@ -8,6 +8,7 @@
 # http://www.cyberciti.biz/tips/block-spamming-scanning-with-iptables.html
 
 # Thanks to Daniel Hansson for providing a PR motivating bringing v2 of this script.
+# https://github.com/enoch85
 
 # path to iptables
 IPTABLES="/sbin/iptables"
@@ -64,8 +65,12 @@ set_mode() {
 }
 
 delete_chain() {
-	$IPTABLES -X "$CHAIN"
-	echo "'$CHAIN' chain removed from iptables."
+        if $IPTABLES -D INPUT -j "$CHAIN" && $IPTABLES -D FORWARD -j "$CHAIN" && $IPTABLES -F "$CHAIN" && $IPTABLES -X "$CHAIN"
+        then
+            echo "'$CHAIN' chain removed from iptables."
+        else
+            echo "'$CHAIN' chain NOT removed, please report this issue to https://github.com/wallyhall/spamhaus-drop/"
+        fi
 }
 
 download_rules() {
