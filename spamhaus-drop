@@ -64,13 +64,22 @@ set_mode() {
 	MODE="$1"
 }
 
+delete_chain_reference() {
+	$IPTABLES -L "$1" | tail -n +3 | grep -e "^$CHAIN " > /dev/null && $IPTABLES -D "$1" -j "$CHAIN"
+}
+
 delete_chain() {
-        if $IPTABLES -D INPUT -j "$CHAIN" && $IPTABLES -D FORWARD -j "$CHAIN" && $IPTABLES -F "$CHAIN" && $IPTABLES -X "$CHAIN"
-        then
-            echo "'$CHAIN' chain removed from iptables."
-        else
-            echo "'$CHAIN' chain NOT removed, please report this issue to https://github.com/wallyhall/spamhaus-drop/"
-        fi
+	if $IPTABLES -L "$CHAIN" -n &> /dev/null; then
+		delete_chain_reference INPUT
+		delete_chain_reference FORWARD
+		if $IPTABLES -F "$CHAIN" && $IPTABLES -X "$CHAIN"; then
+			echo "'$CHAIN' chain removed from iptables."
+		else
+			echo "'$CHAIN' chain NOT removed, please report this issue to https://github.com/wallyhall/spamhaus-drop/"
+		fi
+	else
+		echo "'$CHAIN' does not exist, nothing to delete."
+	fi
 }
 
 download_rules() {
@@ -103,10 +112,8 @@ update_iptables() {
 	fi
 
 	# check to see if the chain already exists
-	if $IPTABLES -L "$CHAIN" -n; then
+	if $IPTABLES -L "$CHAIN" -n &> /dev/null; then
 		# flush the old rules
-		$IPTABLES -D INPUT -j "$CHAIN"
-		$IPTABLES -D FORWARD -j "$CHAIN"
 		$IPTABLES -F "$CHAIN"
 
 		echo "Flushed old rules. Applying updated Spamhaus list...."
