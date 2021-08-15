@@ -59,7 +59,7 @@ Additional options and arguments:
 
 set_mode() {
 	if [ -n "$MODE" ]; then
-		die "You must only specify one of -u/-c/-d"
+		die "You must only specify one of -u/-o/-d/-z"
 	fi
 	MODE="$1"
 }
@@ -105,8 +105,8 @@ update_iptables() {
 	# check to see if the chain already exists
 	if $IPTABLES -L "$CHAIN" -n; then
 		# flush the old rules
-		$IPTABLES -D INPUT -j "$1"
-		$IPTABLES -D FORWARD -j "$1"
+		$IPTABLES -D INPUT -j "$CHAIN"
+		$IPTABLES -D FORWARD -j "$CHAIN"
 		$IPTABLES -F "$CHAIN"
 
 		echo "Flushed old rules. Applying updated Spamhaus list...."
