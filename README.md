@@ -33,6 +33,7 @@ You may wish to apply some "value overrides" to the script, or delete the iptabl
   -c=CHAIN_NAME        Override default iptables chain name
   -l=URL_LIST          Override default block list URLs [careful!]
   -f=CACHE_FILE_PATH   Override default cache file path
+  -m=LOCAL_FILE_PATH   Use my own local additional block list file
   -s                   Skip failed blocklist downloads, continuing instead of aborting
   -z                   Update the blocklist from the local cache, don't download new entries
   -d                   Delete the iptables chain (removing all blocklists)
